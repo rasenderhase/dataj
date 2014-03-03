@@ -56,7 +56,7 @@ public class Demo extends HttpServlet {
 
 This may result in an SQL statement like:
 ```SQL
-select * from employees order by LAST_NAME asc limit 21
+select * from employees order by LAST_NAME asc fetch first 21 rows only
 ```
 
 SQL count statement for total available records:
