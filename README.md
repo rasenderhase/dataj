@@ -1,7 +1,10 @@
 dataj
 =====
 
-This is a Java serverside pagination tool for JQuery datatables plug-in. It interprets the control variables from datatables plug-in and cuts the desired page from the result set.
+Serverside pagination tool for JQuery datatables plug-in written in Java.
+
+It interprets the control variables from datatables plug-in and cuts the desired page from the result set.
+
 [Download it here](https://github.com/rasenderhase/dataj/releases).
 
 Sample Usage
