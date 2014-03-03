@@ -244,13 +244,15 @@ public abstract class ScrollQuery<T, R> {
 	}
 	
 	/**
-	 * Eigene Query-Parameter (z.B. f?r Filterung) setzen
+	 * Override this method to set your own query parameters (e.g. for filtering)
 	 * @param aCon
 	 * @param tmpString
 	 * @return
 	 * @throws SQLException 
 	 */
-	protected abstract PreparedStatement prepareStatement(Connection aCon, String tmpString) throws SQLException;
+	protected PreparedStatement prepareStatement(Connection aCon, String tmpString) throws SQLException {
+		return aCon.prepareStatement(tmpString);
+	}
 	
 	/**
 	 * Ergbniszeile auf ein Ergebnisobjekt mappen.
