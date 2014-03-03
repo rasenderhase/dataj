@@ -6,12 +6,13 @@ This is a Java serverside pagination tool for JQuery datatables plug-in. It inte
 Sample Usage
 ------------
 
-Just pass a datasource, a select and the HTTP parameter map to JqPaginationQuery and create the output JSON. dataj creates the order by statements for you and cuts the desired piece from the result set.
+Just pass a datasource, a select and the HTTP parameter map to JqPaginationQuery and create the output JSON. dataj creates the order by statements for you and cuts the desired piece from the result set. It also counts the total amount of available records.
 
 See also [www.datatables.net with server side object data](http://www.datatables.net/release-datatables/examples/server_side/object_data.html)
 
-It is important for dataj to have the JSON property have the same name as the table column. It uses this information for automatic order.
+It is important for dataj to have the JSON property have the same name as the table column:
 `w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));`
+It uses this information for automatic order.
 
 Complete sample:
 
@@ -56,3 +57,13 @@ public class Demo extends HttpServlet {
 This may result in an SQL statement like:
 ```SQL
 select * from employees order by LAST_NAME asc limit 21
+```
+
+SQL count statement for total available records:
+```SQL
+select count(1) from (select 1 from (select * from employees) xy ) xy
+```
+The count query
+* is executed in its own thread
+* has no order by clause
+for performance issues.
