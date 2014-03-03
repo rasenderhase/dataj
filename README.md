@@ -1,2 +1,58 @@
 dataj
 =====
+
+This is a Java serverside pagination tool for JQuery datatables plug-in. It interprets the control variables from datatables plug-in and cuts the desired page from the result set.
+
+Sample Usage
+------------
+
+Just pass a datasource, a select and the HTTP parameter map to JqPaginationQuery and create the output JSON. dataj creates the order by statements for you and cuts the desired piece from the result set.
+
+See also [www.datatables.net with server side object data](http://www.datatables.net/release-datatables/examples/server_side/object_data.html)
+
+It is important for dataj to have the JSON property have the same name as the table column. It uses this information for automatic order.
+`w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));`
+
+Complete sample:
+
+```java
+public class Demo extends HttpServlet {
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			DataSource dataSource = (DataSource) InitialContext.doLookup("java:comp/env/JDBC");
+			final Writer writer = resp.getWriter();
+			final JSONWriter w = new JSONWriter(writer);
+			w.object();
+			
+			w.key("aaData");
+			JqListPage<Object> page = new JqPaginationQuery<Object>(dataSource, "select * from employees", req.getParameterMap()) {
+				@Override
+				protected Object mapRow(ResultSet rs) throws SQLException {
+					w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));
+					w.key("LAST_NAME").value(rs.getString("LAST_NAME"));
+					w.key("BIRTHDAY").value(new SimpleDateFormat().format(rs.getDate("BIRTHDAY")));
+					//... and so on
+					return null; //return value not needed because content is directly put to JSON output
+				}
+			}.execute();
+
+			w.key("iTotalRecords").value(page.getTotalRecords());
+			w.key("iTotalDisplayRecords").value(page.getTotalDisplayRecords());
+			w.key("sEcho").value(page.getEcho());
+			w.endObject();
+			writer.flush();
+		} catch (SQLException ex) {
+			throw new ServletException("DB access failed");
+		} catch (NamingException e) {
+			throw new ServletException("Lookup failed");
+		}
+	}
+}
+
+```
+
+This may result in an SQL statement like:
+```SQL
+select * from employees order by LAST_NAME asc limit 21
