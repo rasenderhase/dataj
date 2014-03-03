@@ -176,7 +176,7 @@ public abstract class ScrollQuery<T, R> {
 			try { aCon.close(); } catch (Exception e) { error("close", e);};
 		}
 		
-		if (enableCount) {
+		if (!enableCount) {
 			if (isMoreResultsAvailable()) {
 				//Wenn Count disabled, Anzahl der Datens?tze sch?tzen
 				// (immer 1 gr??er als die aktuelle Page, damit jQuery das Paging einblendet)
