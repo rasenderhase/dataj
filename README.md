@@ -32,17 +32,20 @@ public class Demo extends HttpServlet {
 			w.object();
 			
 			w.key("aaData");
+			w.array();
 			ListPage<Object> page = new JqPaginationQuery<Object>(dataSource, "select * from employees", req.getParameterMap()) {
 				@Override
 				protected Object mapRow(ResultSet rs) throws SQLException {
+					w.object();
 					w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));
 					w.key("LAST_NAME").value(rs.getString("LAST_NAME"));
 					w.key("BIRTHDAY").value(new SimpleDateFormat().format(rs.getDate("BIRTHDAY")));
 					//... and so on
+					w.endObject();
 					return null; //return value not needed because content is directly put to JSON output
 				}
 			}.execute();
-
+			w.endArray();
 			w.key("iTotalRecords").value(page.getTotalRecords());
 			w.key("iTotalDisplayRecords").value(page.getTotalDisplayRecords());
 			w.key("sEcho").value(page.getEcho());
