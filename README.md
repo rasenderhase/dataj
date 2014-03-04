@@ -76,6 +76,6 @@ The count query
 * is executed in its own thread
 * has no order by clause
 
-for performance issues.
+for performance reasons.
 
 For class JSONWriter refer to https://github.com/douglascrockford/JSON-java .
