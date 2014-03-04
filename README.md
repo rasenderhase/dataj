@@ -32,7 +32,7 @@ public class Demo extends HttpServlet {
 			w.object();
 			
 			w.key("aaData");
-			JqListPage<Object> page = new JqPaginationQuery<Object>(dataSource, "select * from employees", req.getParameterMap()) {
+			ListPage<Object> page = new JqPaginationQuery<Object>(dataSource, "select * from employees", req.getParameterMap()) {
 				@Override
 				protected Object mapRow(ResultSet rs) throws SQLException {
 					w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));
