@@ -49,9 +49,9 @@ public class Demo extends HttpServlet {
 			w.endObject();
 			writer.flush();
 		} catch (SQLException ex) {
-			throw new ServletException("DB access failed");
+			throw new ServletException("DB access failed", ex);
 		} catch (NamingException e) {
-			throw new ServletException("Lookup failed");
+			throw new ServletException("Lookup failed", e);
 		}
 	}
 }
