@@ -75,4 +75,7 @@ select count(1) from (select 1 from (select * from employees) xy ) xy
 The count query
 * is executed in its own thread
 * has no order by clause
+
 for performance issues.
+
+For class JSONWriter refer to https://github.com/douglascrockford/JSON-java .
