@@ -5,12 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 
-public abstract class ScrollQuery<T, R> {
+public abstract class ScrollQuery<T> {
 	
 	private class CountRunner implements Runnable {
 		private int totalDisplayRecords = -1;
@@ -90,10 +92,12 @@ public abstract class ScrollQuery<T, R> {
 	
 	private final int displayStart;
 	private final int displayLength;
-	private final Gruppenwechsel<R> gruppenwechsel;
+	private final Gruppenwechsel<T> gruppenwechsel;
 
 	private int rowCnt = 0;
 	private boolean moreResultsAvailable = false;
+	
+	private final List<T> data = new ArrayList<T>();
 	
 	/**
 	 * Ausf?hren einer Named Query. Es werden alle Datens?tze verarbeitet bis {@link #processRow(Map)} <code>false</code> zur?ckgibt.
@@ -114,7 +118,7 @@ public abstract class ScrollQuery<T, R> {
 	 * @param enableCount Einschalten des Count-Threads, der ermittelt, wieviele Ergebnisse die Query liefert
 	 * @param countGroupBy Spaltennamen, nach denen gruppiert wird, falls das Ergebnis Gruppen enth?lt (zusammen mit <code>gruppenwechsel</code>)
 	 */
-	public ScrollQuery(DataSource dataSource, String queryString, int displayStart, int displayLength, Gruppenwechsel<R> gruppenwechsel, boolean enableCount, String countGroupBy) {
+	public ScrollQuery(DataSource dataSource, String queryString, int displayStart, int displayLength, Gruppenwechsel<T> gruppenwechsel, boolean enableCount, String countGroupBy) {
 		this.dataSource = dataSource;
 		this.queryString = queryString;
 		this.displayStart = displayStart;
@@ -135,11 +139,11 @@ public abstract class ScrollQuery<T, R> {
 	}
 	
 	/**
-	 * Query ausf?hren und Resultset verarbeiten.
+	 * Query ausführen und Resultset verarbeiten.
 	 * @return Ergebnis der Verarbeitung
 	 * @throws DBException 
 	 */
-	public T execute() throws SQLException {
+	public ListPage<T> execute() throws SQLException {
 		final long start = System.currentTimeMillis();
 
 		final CountRunner count = new CountRunner();
@@ -210,7 +214,7 @@ public abstract class ScrollQuery<T, R> {
 					processMetaData(metaData);
 					
 					while (rs.next()) {
-						R row = mapRow(rs);
+						T row = mapRow(rs);
 						
 						increaseRowIdx(row);
 
@@ -260,7 +264,7 @@ public abstract class ScrollQuery<T, R> {
 	 * @return
 	 * @throws SQLException
 	 */
-	protected abstract R mapRow(ResultSet rs) throws SQLException;
+	protected abstract T mapRow(ResultSet rs) throws SQLException;
 	
 	/**
 	 * Verarbeiten einer Ergebnis-Zeile.
@@ -269,9 +273,17 @@ public abstract class ScrollQuery<T, R> {
 	 * @return <code>true</code>, wenn die ResultSet-Verarbeitung nach dieser Zeile fortgesetzt werden soll
 	 * @throws SQLException 
 	 */
-	protected abstract boolean processRow(ResultSet rs, R row) throws SQLException;
+	protected boolean processRow(ResultSet rs, T row) throws SQLException {
+		data.add(row);
+		return true;
+	}
 		
-	protected abstract T getResult();
+	protected ListPage<T> getResult() {
+		ListPage<T> page = new ListPage<T>();
+		page.setData(data);
+		page.setTotalDisplayRecords(getTotalRecords());
+		return page;
+	}
 	
 	protected int getRowCnt() {
 		return rowCnt;
@@ -281,7 +293,7 @@ public abstract class ScrollQuery<T, R> {
 		this.rowCnt = rowIdx;
 	}
 
-	protected void increaseRowIdx(R row) throws SQLException {
+	protected void increaseRowIdx(T row) throws SQLException {
 		if (gruppenwechsel != null) {
 			gruppenwechsel.processRow(row);
 		}
@@ -310,7 +322,7 @@ public abstract class ScrollQuery<T, R> {
 		return displayLength;
 	}
 
-	public Gruppenwechsel<R> getGruppenwechsel() {
+	public Gruppenwechsel<T> getGruppenwechsel() {
 		return gruppenwechsel;
 	}
 

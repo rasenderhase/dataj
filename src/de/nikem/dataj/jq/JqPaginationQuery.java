@@ -1,17 +1,15 @@
 package de.nikem.dataj.jq;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
 import de.nikem.dataj.Gruppenwechsel;
+import de.nikem.dataj.ListPage;
 import de.nikem.dataj.ScrollQuery;
 
-public abstract class JqPaginationQuery<T> extends ScrollQuery<JqListPage<T>, T> {
+public abstract class JqPaginationQuery<T> extends ScrollQuery<T> {
 
 	private static final Pattern PATTERN_TRUE = Pattern.compile("on|true|1", Pattern.CASE_INSENSITIVE);
 	protected static final String NO_GROUP_BY = "";
@@ -20,9 +18,6 @@ public abstract class JqPaginationQuery<T> extends ScrollQuery<JqListPage<T>, T>
 	private final String orderBy;
 	private final String[] dataProps;
 
-
-	private final List<T> data = new ArrayList<T>();
-	
 	public JqPaginationQuery(DataSource dataSource, String queryString, Map<String, String[]> requestParameterMap) {
 		this(dataSource, queryString, requestParameterMap, null, null);
 	}
@@ -76,18 +71,10 @@ public abstract class JqPaginationQuery<T> extends ScrollQuery<JqListPage<T>, T>
 	}
 	
 	@Override
-	protected JqListPage<T> getResult() {
-		JqListPage<T> page = new JqListPage<T>();
+	protected ListPage<T> getResult() {
+		ListPage<T> page = super.getResult();
 		page.setEcho(echo);
-		page.setAaData(data);
-		page.setTotalDisplayRecords(getTotalRecords());
 		return page;
-	}
-	
-	@Override
-	protected boolean processRow(ResultSet rs, T row) {
-		data.add(row);
-		return true;
 	}
 
 	/**

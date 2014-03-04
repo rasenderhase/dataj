@@ -1,4 +1,4 @@
-package de.nikem.dataj.jq;
+package de.nikem.dataj;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @param <T> Datentyp eines Elements der Liste
  */
-public class JqListPage<T> implements Serializable {
+public class ListPage<T> implements Serializable {
 	private static final long serialVersionUID = -7889719245186844185L;
 
 	private String echo;
 	private int totalRecords;
 	private int totalDisplayRecords;
-	private List<T> aaData = new ArrayList<T>();
+	private List<T> data = new ArrayList<T>();
 	public String getEcho() {
 		return echo;
 	}
@@ -36,10 +36,10 @@ public class JqListPage<T> implements Serializable {
 	public void setTotalDisplayRecords(int totalDisplayRecords) {
 		this.totalDisplayRecords = totalDisplayRecords;
 	}
-	public List<T> getAaData() {
-		return aaData;
+	public List<T> getData() {
+		return data;
 	}
-	public void setAaData(List<T> aaData) {
-		this.aaData = aaData;
+	public void setData(List<T> aaData) {
+		this.data = aaData;
 	}
 }
