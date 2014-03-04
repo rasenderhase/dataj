@@ -27,6 +27,8 @@ public class Demo extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			DataSource dataSource = (DataSource) InitialContext.doLookup("java:comp/env/JDBC");
+			resp.setCharacterEncoding("UTF-8");
+			resp.setHeader("Content-Type", "application/json;charset=utf-8");
 			final Writer writer = resp.getWriter();
 			final JSONWriter w = new JSONWriter(writer);
 			w.object();
