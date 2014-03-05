@@ -24,12 +24,18 @@ public class ListPage<T> implements Serializable {
 	public void setEcho(String echo) {
 		this.echo = echo;
 	}
+	/**
+	 * @return Total number of available records (may be displayed in "... filtered from <i><code>totalRecords</code></i> records")
+	 */
 	public int getTotalRecords() {
 		return totalRecords;
 	}
 	public void setTotalRecords(int totalRecords) {
 		this.totalRecords = totalRecords;
 	}
+	/**
+	 * @return total number of records (paging ends at this limit)
+	 */
 	public int getTotalDisplayRecords() {
 		return totalDisplayRecords;
 	}

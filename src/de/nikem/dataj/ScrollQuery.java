@@ -56,9 +56,9 @@ public abstract class ScrollQuery<T> {
 			} catch (SQLException e) {
 				error("Count konnte nicht ermittelt werden", e);
 			} finally {
-				try { aCon.close(); } catch (Exception e) { error("close", e); }
 				try { rs.close(); } catch (Exception e) { error("close", e); }
 				try { stmt.close(); } catch (Exception e) { error("close", e); }
+				try { aCon.close(); } catch (Exception e) { error("close", e); }
 			}
 			return count;
 		}
@@ -154,16 +154,6 @@ public abstract class ScrollQuery<T> {
 			countThread.start();
 		}
 		
-		synchronized(lock) {
-			while (!count.isReady()){
-				try {
-					lock.wait(10000);
-				} catch (InterruptedException e) {
-					error("Count Thread has been interrupted.", e);
-				}
-			}
-		}
-		
 		final String tmpString;
 		if (getGruppenwechsel() == null) {
 			// fetch first... nur wenn kein Gruppenwechsel im ResultSet
@@ -182,8 +172,8 @@ public abstract class ScrollQuery<T> {
 		
 		if (!enableCount) {
 			if (isMoreResultsAvailable()) {
-				//Wenn Count disabled, Anzahl der Datens?tze sch?tzen
-				// (immer 1 gr??er als die aktuelle Page, damit jQuery das Paging einblendet)
+				//Wenn Count disabled, Anzahl der Datensätze schätzen
+				// (immer 1 größer als die aktuelle Page, damit jQuery das Paging einblendet)
 				totalRecords = getDisplayStart() + getDisplayLength() + 1;
 			} else {
 				//Ende des Resultsets erreicht...
@@ -191,6 +181,15 @@ public abstract class ScrollQuery<T> {
 			}
 		} else {
 			//Richtiges Paging mit Count-Query
+			synchronized(lock) {
+				while (!count.isReady()){
+					try {
+						lock.wait(10000);
+					} catch (InterruptedException e) {
+						error("Count Thread has been interrupted.", e);
+					}
+				}
+			}
 			totalRecords = count.getTotalDisplayRecords();
 		}
 		
@@ -224,7 +223,7 @@ public abstract class ScrollQuery<T> {
 
 						// ResultSet war noch nicht zu Ende: 
 						// es gibt noch mehr Ergebnisse.
-						if (displayLength == Integer.MAX_VALUE					// - Keine Page-Gr??enbeschr?nkung
+						if (displayLength == Integer.MAX_VALUE					// - Keine Page-Größenbeschränkung
 								|| getRowCnt() > displayStart + displayLength	// - Page zu Ende
 								|| !cont && rs.next()) {						// - Scrolling abgebrochen
 							moreResultsAvailable = true;
