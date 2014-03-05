@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterEvent.Type;
+import javax.swing.event.RowSorterListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -17,7 +20,7 @@ import javax.swing.table.TableRowSorter;
  * pagination parameters in "<a href="http://www.datatables.net/release-datatables/examples/server_side/object_data.html">datatables.net</a> style".
  * @author andreas
  */
-public class ServerTableRowSorter extends TableRowSorter<TableModel> {
+public class ServerTableRowSorter extends TableRowSorter<TableModel> implements RowSorterListener {
 
 	private final String[] dbColumnNames;
 
@@ -36,11 +39,19 @@ public class ServerTableRowSorter extends TableRowSorter<TableModel> {
 		super(model);
 		this.dbColumnNames = dbColumnNames;
 		this.iDisplayLength = iDisplayLength;
+		addRowSorterListener(this);
 	}
 
 	@Override
 	public void sort() {
 		//do nothing. Server Side Sorting
+	}
+	
+	@Override
+	public void sorterChanged(RowSorterEvent e) {
+		if (e.getType() == Type.SORT_ORDER_CHANGED) {
+			this.iDisplayStart = 0;		//When Sort is changed goto first page
+		}
 	}
 	
 	/**
