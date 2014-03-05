@@ -109,10 +109,12 @@ public class ServerTableRowSorter extends TableRowSorter<TableModel> {
 	}
 
 	/**
+	 * set the page size. Also sets <code>iDisplayStart</code> to 0.
 	 * @param iDisplayLength desired length of the list page (number of records displayed in last page may be smaller)
 	 */
 	public void setiDisplayLength(int iDisplayLength) {
 		this.iDisplayLength = iDisplayLength;
+		this.iDisplayStart = 0;
 		fireRowSorterChanged(null);
 	}
 	
