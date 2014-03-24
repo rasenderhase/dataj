@@ -206,7 +206,7 @@ public abstract class ScrollQuery<T> {
 				try {
 					debug(tmpString);
 					stmt = prepareStatement(aCon, tmpString);
-					rs = stmt.executeQuery();
+					rs = executeQuery(stmt);
 					ResultSetMetaData metaData = rs.getMetaData();
 					boolean cont = true;
 
@@ -236,16 +236,7 @@ public abstract class ScrollQuery<T> {
 				}
 		debug("  getData fertig:                        " + (System.currentTimeMillis() - start) + " ms");
 	}
-	
-	/**
-	 * Verarbeiten der Meta-Daten (z.B. um eine Header-Zeile einzuf?gen)
-	 * @param metaData
-	 * @throws SQLException 
-	 */
-	protected void processMetaData(ResultSetMetaData metaData) throws SQLException {
-		//subclass Responsibility
-	}
-	
+
 	/**
 	 * Override this method to set your own query parameters (e.g. for filtering)
 	 * @param aCon
@@ -255,6 +246,27 @@ public abstract class ScrollQuery<T> {
 	 */
 	protected PreparedStatement prepareStatement(Connection aCon, String tmpString) throws SQLException {
 		return aCon.prepareStatement(tmpString);
+	}
+	
+	/**
+	 * Override this Method if you need alternative query execution (e.g. normal
+	 * statement - not prepared statement, or database metadata query)
+	 * @param stmt
+	 * @return
+	 * @throws SQLException
+	 */
+	protected ResultSet executeQuery(PreparedStatement stmt)
+			throws SQLException {
+		return stmt.executeQuery();
+	}
+	
+	/**
+	 * Verarbeiten der Meta-Daten (z.B. um eine Header-Zeile einzufügen)
+	 * @param metaData
+	 * @throws SQLException 
+	 */
+	protected void processMetaData(ResultSetMetaData metaData) throws SQLException {
+		//subclass Responsibility
 	}
 	
 	/**
