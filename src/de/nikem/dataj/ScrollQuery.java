@@ -223,9 +223,9 @@ public abstract class ScrollQuery<T> {
 
 						// ResultSet war noch nicht zu Ende: 
 						// es gibt noch mehr Ergebnisse.
-						if (displayLength != Integer.MAX_VALUE					// - Keine Page-Größenbeschränkung
-								&& (getRowCnt() > displayStart + displayLength	// - Page zu Ende
-										|| !cont && rs.next())) {				// - Scrolling abgebrochen
+						if (displayLength != Integer.MAX_VALUE						// - Page-Größenbeschränkung
+									&& getRowCnt() > displayStart + displayLength	// 		- und Page zu Ende
+								|| !cont && rs.next()) {							// - oder Scrolling abgebrochen
 							moreResultsAvailable = true;
 							break;
 						}
