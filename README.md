@@ -79,3 +79,51 @@ The count query
 for performance reasons.
 
 For class JSONWriter refer to https://github.com/douglascrockford/JSON-java .
+
+Swing client
+------------
+
+Initialization code inside your panel
+
+```java
+
+		//server-side sorter with initial page size 25
+		ServerTableRowSorter sorter = new ServerTableRowSorter(25, tableModel, 
+				new String [] {
+				"FIRST_NAME",
+				"LAST_NAME",
+				"BIRTHDAY"
+		});
+		// initial sorting
+		List<SortKey> initialSortKeys = new ArrayList<SortKey>();
+		initialSortKeys.add(new SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(initialSortKeys);
+		
+		// table and table model
+		TableModel tableModel = ...
+		JTable table = new JTable(tableModel);
+		table.setRowSorter(sorter);
+		sorter.addRowSorterListener(this);
+		
+		// pagination panel. place it below the table or wherever you want
+		PaginationPanel paginationPanel = new PaginationPanel(sorter);
+		
+		// page display length selection combobox. place it above the table...
+		DisplayLengthSelectionPanel dlsPanel = new DisplayLengthSelectionPanel(sorter);
+
+```
+
+The `RowSorterListener`
+```java
+	@Override
+	public void sorterChanged(RowSorterEvent e) {
+		Map<String, String[]> parameters = sorter.getParameters();
+		// send parameters to server or call pagination select directly...
+		
+		// e.g....
+		ListPage<MyDto> page = getDaoFactory().getMyDao().selectPage(dataSource, parameters);
+		tableModel.setTableData(page);
+		paginationPanel.update(page);	//updates pagination text (1 to 25 records of totally 387) and previous/next button enabling
+	}
+```
+
