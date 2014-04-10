@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Dataj by rasenderhase</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Dataj</h1>
+        <h2>Serverside pagination for JQuery datatables plug-in with Java</h2>
+        <a href="https://github.com/rasenderhase/dataj" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="dataj" class="anchor" href="#dataj"><span class="octicon octicon-link"></span></a>dataj</h1>
+
+<p>Serverside pagination tool for JQuery datatables plug-in written in Java.</p>
+
+<p>It interprets the control variables from datatables plug-in and cuts the desired page from the result set.</p>
+
+<p><a href="https://github.com/rasenderhase/dataj/releases">Download it here</a>.</p>
+
+<h2>
+<a name="sample-usage" class="anchor" href="#sample-usage"><span class="octicon octicon-link"></span></a>Sample Usage</h2>
+
+<p>Just pass a datasource, a select and the HTTP parameter map to JqPaginationQuery and create the output JSON. dataj creates the order by statements for you and cuts the desired piece from the result set. It also counts the total amount of available records.</p>
+
+<p>See also <a href="http://www.datatables.net/release-datatables/examples/server_side/object_data.html">www.datatables.net with server side object data</a></p>
+
+<p>It is important for dataj to have the JSON property have the same name as the table column:
+<code>w.key("FIRST_NAME").value(rs.getString("FIRST_NAME"));</code>
+It uses this information for automatic order.</p>
+
+<p>Complete sample:</p>
+
+<div class="highlight highlight-java"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo</span> <span class="kd">extends</span> <span class="n">HttpServlet</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">doGet</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">req</span><span class="o">,</span> <span class="n">HttpServletResponse</span> <span class="n">resp</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">ServletException</span><span class="o">,</span> <span class="n">IOException</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">DataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="o">(</span><span class="n">DataSource</span><span class="o">)</span> <span class="n">InitialContext</span><span class="o">.</span><span class="na">doLookup</span><span class="o">(</span><span class="s">"java:/comp/env/JDBC"</span><span class="o">);</span>
+            <span class="n">resp</span><span class="o">.</span><span class="na">setCharacterEncoding</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+            <span class="n">resp</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Content-Type"</span><span class="o">,</span> <span class="s">"application/json;charset=utf-8"</span><span class="o">);</span>
+            <span class="kd">final</span> <span class="n">Writer</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="na">getWriter</span><span class="o">();</span>
+            <span class="kd">final</span> <span class="n">JSONWriter</span> <span class="n">w</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JSONWriter</span><span class="o">(</span><span class="n">writer</span><span class="o">);</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">object</span><span class="o">();</span>
+
+            <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"aaData"</span><span class="o">);</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">array</span><span class="o">();</span>
+            <span class="n">ListPage</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">page</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JqPaginationQuery</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;(</span><span class="n">dataSource</span><span class="o">,</span> <span class="s">"select * from employees"</span><span class="o">,</span> <span class="n">req</span><span class="o">.</span><span class="na">getParameterMap</span><span class="o">())</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">mapRow</span><span class="o">(</span><span class="n">ResultSet</span> <span class="n">rs</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="o">{</span>
+                    <span class="n">w</span><span class="o">.</span><span class="na">object</span><span class="o">();</span>
+                    <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"FIRST_NAME"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"FIRST_NAME"</span><span class="o">));</span>
+                    <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"LAST_NAME"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">"LAST_NAME"</span><span class="o">));</span>
+                    <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"BIRTHDAY"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="k">new</span> <span class="n">SimpleDateFormat</span><span class="o">().</span><span class="na">format</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getDate</span><span class="o">(</span><span class="s">"BIRTHDAY"</span><span class="o">)));</span>
+                    <span class="c1">//... and so on</span>
+                    <span class="n">w</span><span class="o">.</span><span class="na">endObject</span><span class="o">();</span>
+                    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">//return value not needed because content is directly put to JSON output</span>
+                <span class="o">}</span>
+            <span class="o">}.</span><span class="na">execute</span><span class="o">();</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">endArray</span><span class="o">();</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"iTotalRecords"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="n">page</span><span class="o">.</span><span class="na">getTotalRecords</span><span class="o">());</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"iTotalDisplayRecords"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="n">page</span><span class="o">.</span><span class="na">getTotalDisplayRecords</span><span class="o">());</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">key</span><span class="o">(</span><span class="s">"sEcho"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="n">page</span><span class="o">.</span><span class="na">getEcho</span><span class="o">());</span>
+            <span class="n">w</span><span class="o">.</span><span class="na">endObject</span><span class="o">();</span>
+            <span class="n">writer</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">SQLException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">ServletException</span><span class="o">(</span><span class="s">"DB access failed"</span><span class="o">,</span> <span class="n">ex</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NamingException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">ServletException</span><span class="o">(</span><span class="s">"Lookup failed"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</pre></div>
+
+<p>This may result in an SQL statement like:</p>
+
+<div class="highlight highlight-SQL"><pre><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">employees</span> <span class="k">order</span> <span class="k">by</span> <span class="n">LAST_NAME</span> <span class="k">asc</span> <span class="k">fetch</span> <span class="k">first</span> <span class="mi">21</span> <span class="k">rows</span> <span class="k">only</span>
+</pre></div>
+
+<p>SQL count statement for total available records:</p>
+
+<div class="highlight highlight-SQL"><pre><span class="k">select</span> <span class="k">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">from</span> <span class="p">(</span><span class="k">select</span> <span class="mi">1</span> <span class="k">from</span> <span class="p">(</span><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">employees</span><span class="p">)</span> <span class="n">xy</span> <span class="p">)</span> <span class="n">xy</span>
+</pre></div>
+
+<p>The count query</p>
+
+<ul>
+<li>is executed in its own thread</li>
+<li>has no order by clause</li>
+</ul><p>for performance reasons.</p>
+
+<p>For class JSONWriter refer to <a href="https://github.com/douglascrockford/JSON-java">https://github.com/douglascrockford/JSON-java</a> .</p>
+
+<h2>
+<a name="swing-client" class="anchor" href="#swing-client"><span class="octicon octicon-link"></span></a>Swing client</h2>
+
+<p>Initialization code inside your panel</p>
+
+<div class="highlight highlight-java"><pre>
+        <span class="c1">//server-side sorter with initial page size 25</span>
+        <span class="n">ServerTableRowSorter</span> <span class="n">sorter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServerTableRowSorter</span><span class="o">(</span><span class="mi">25</span><span class="o">,</span> <span class="n">tableModel</span><span class="o">,</span> 
+                <span class="k">new</span> <span class="n">String</span> <span class="o">[]</span> <span class="o">{</span>
+                <span class="s">"FIRST_NAME"</span><span class="o">,</span>
+                <span class="s">"LAST_NAME"</span><span class="o">,</span>
+                <span class="s">"BIRTHDAY"</span>
+        <span class="o">});</span>
+        <span class="c1">// initial sorting</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SortKey</span><span class="o">&gt;</span> <span class="n">initialSortKeys</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">SortKey</span><span class="o">&gt;();</span>
+        <span class="n">initialSortKeys</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="n">SortKey</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">SortOrder</span><span class="o">.</span><span class="na">ASCENDING</span><span class="o">));</span>
+        <span class="n">sorter</span><span class="o">.</span><span class="na">setSortKeys</span><span class="o">(</span><span class="n">initialSortKeys</span><span class="o">);</span>
+
+        <span class="c1">// table and table model</span>
+        <span class="n">TableModel</span> <span class="n">tableModel</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="n">JTable</span> <span class="n">table</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JTable</span><span class="o">(</span><span class="n">tableModel</span><span class="o">);</span>
+        <span class="n">table</span><span class="o">.</span><span class="na">setRowSorter</span><span class="o">(</span><span class="n">sorter</span><span class="o">);</span>
+        <span class="n">sorter</span><span class="o">.</span><span class="na">addRowSorterListener</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+
+        <span class="c1">// pagination panel. place it below the table or wherever you want</span>
+        <span class="n">PaginationPanel</span> <span class="n">paginationPanel</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PaginationPanel</span><span class="o">(</span><span class="n">sorter</span><span class="o">);</span>
+
+        <span class="c1">// page display length selection combobox. place it above the table...</span>
+        <span class="n">DisplayLengthSelectionPanel</span> <span class="n">dlsPanel</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DisplayLengthSelectionPanel</span><span class="o">(</span><span class="n">sorter</span><span class="o">);</span>
+
+</pre></div>
+
+<p>The <code>RowSorterListener</code></p>
+
+<div class="highlight highlight-java"><pre>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">sorterChanged</span><span class="o">(</span><span class="n">RowSorterEvent</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">[]&gt;</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">sorter</span><span class="o">.</span><span class="na">getParameters</span><span class="o">();</span>
+        <span class="c1">// send parameters to server or call pagination select directly...</span>
+
+        <span class="c1">// e.g....</span>
+        <span class="n">ListPage</span><span class="o">&lt;</span><span class="n">MyDto</span><span class="o">&gt;</span> <span class="n">page</span> <span class="o">=</span> <span class="n">getDaoFactory</span><span class="o">().</span><span class="na">getMyDao</span><span class="o">().</span><span class="na">selectPage</span><span class="o">(</span><span class="n">dataSource</span><span class="o">,</span> <span class="n">parameters</span><span class="o">);</span>
+        <span class="n">tableModel</span><span class="o">.</span><span class="na">setTableData</span><span class="o">(</span><span class="n">page</span><span class="o">);</span>
+        <span class="n">paginationPanel</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">page</span><span class="o">);</span>   <span class="c1">//updates pagination text (1 to 25 records of totally 387) and previous/next button enabling</span>
+    <span class="o">}</span>
+</pre></div>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/rasenderhase/dataj/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/rasenderhase/dataj/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/rasenderhase/dataj"></a> is maintained by <a href="https://github.com/rasenderhase">rasenderhase</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
